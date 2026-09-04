@@ -2,6 +2,8 @@
 
 namespace App\Services\Gemini;
 
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -36,23 +38,35 @@ class GeminiClient
             throw new GeminiException('Falta configurar la API key de Gemini en el servidor (GEMINI_API_KEY en el .env).');
         }
 
-        $response = Http::withHeaders(['x-goog-api-key' => $this->apiKey])
-            ->timeout(120)
-            ->post(sprintf(self::ENDPOINT, $this->model), [
-                'contents' => [
-                    [
-                        'role' => 'user',
-                        'parts' => [
-                            ['text' => $this->buildPrompt($this->truncate($documentText), $options)],
+        try {
+            // Gemini devuelve 503 con cierta frecuencia cuando el modelo está
+            // sobrecargado (transitorio, no un error real) — se reintenta un
+            // par de veces antes de rendirse y mostrarle el error al usuario.
+            $response = Http::withHeaders(['x-goog-api-key' => $this->apiKey])
+                ->timeout(120)
+                ->retry(2, 1500, fn ($exception) => $exception instanceof RequestException
+                    && in_array($exception->response->status(), [500, 503], true))
+                ->throw()
+                ->post(sprintf(self::ENDPOINT, $this->model), [
+                    'contents' => [
+                        [
+                            'role' => 'user',
+                            'parts' => [
+                                ['text' => $this->buildPrompt($this->truncate($documentText), $options)],
+                            ],
                         ],
                     ],
-                ],
-                'generationConfig' => [
-                    'temperature' => self::TEMPERATURE,
-                    'responseMimeType' => 'application/json',
-                    'responseSchema' => $this->responseSchema(),
-                ],
-            ]);
+                    'generationConfig' => [
+                        'temperature' => self::TEMPERATURE,
+                        'responseMimeType' => 'application/json',
+                        'responseSchema' => $this->responseSchema(),
+                    ],
+                ]);
+        } catch (RequestException $e) {
+            $response = $e->response;
+        } catch (ConnectionException) {
+            throw new GeminiException('No se pudo conectar con Gemini. Revisa tu conexión e intenta de nuevo.');
+        }
 
         if ($response->failed()) {
             Log::warning('Gemini respondió con error', [
@@ -63,6 +77,7 @@ class GeminiClient
             throw new GeminiException(match (true) {
                 $response->status() === 429 => 'Gemini está recibiendo demasiadas solicitudes en este momento. Intenta de nuevo en unos segundos.',
                 in_array($response->status(), [400, 403], true) => 'La API key de Gemini configurada no es válida o no tiene permisos.',
+                in_array($response->status(), [500, 503], true) => 'Gemini está sobrecargado en este momento (ya lo reintentamos un par de veces). Intenta de nuevo en un momento.',
                 default => 'No se pudo generar el resumen. Intenta de nuevo más tarde.',
             });
         }

@@ -61,7 +61,7 @@ El resumen no funciona sin una API key de Gemini. Consigue una gratis en [Google
 
 ```bash
 GEMINI_API_KEY=tu-api-key
-GEMINI_MODEL=gemini-2.5-flash   # opcional, ya viene con este valor por defecto
+GEMINI_MODEL=gemini-3.6-flash   # opcional, ya viene con este valor por defecto
 ```
 
 No hace falta reiniciar los contenedores: Laravel lee el `.env` en cada request.

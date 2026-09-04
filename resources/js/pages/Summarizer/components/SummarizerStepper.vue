@@ -26,12 +26,22 @@ function stateOf(step) {
 }
 
 const progressPercent = computed(() => ((store.currentStep - 1) / (steps.length - 1)) * 100)
+
+// Con N columnas iguales, el centro de cada círculo cae en (i + 0.5) / N de
+// ancho. Para que la línea empiece exactamente en el centro del primer paso
+// y termine en el centro del último, sus márgenes deben ser 0.5 / N (no un
+// valor fijo en px como antes, que se desalineaba según el ancho real de la
+// vista).
+const edgeInsetPercent = computed(() => 50 / steps.length)
 </script>
 
 <template>
   <nav aria-label="Progreso del resumen">
     <ol class="relative grid grid-cols-4 gap-2">
-      <div class="absolute top-4 left-0 right-0 h-0.5 bg-slate-200 dark:bg-white/10 mx-8">
+      <div
+        class="absolute top-4 h-0.5 bg-slate-200 dark:bg-white/10"
+        :style="{ left: `${edgeInsetPercent}%`, right: `${edgeInsetPercent}%` }"
+      >
         <div
           class="h-full bg-primary transition-all duration-300"
           :style="{ width: `${progressPercent}%` }"

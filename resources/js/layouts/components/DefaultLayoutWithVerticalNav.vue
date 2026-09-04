@@ -1,5 +1,4 @@
 <script setup>
-import Footer from '@/layouts/components/Footer.vue'
 import NavItems from '@/layouts/components/NavItems/NavItems.vue'
 import { useThemeSwitcher } from '@/hooks/layout/useThemeSwitcher'
 import { useDarkModeStore } from '@/store/dark-mode'
@@ -89,11 +88,6 @@ const goToHome = () => {
 
     <!-- 👉 Pages -->
     <slot />
-
-    <!-- 👉 Footer -->
-    <template #footer>
-      <Footer />
-    </template>
   </VerticalNavLayout>
 </template>
 

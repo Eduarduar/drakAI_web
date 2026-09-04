@@ -62,10 +62,13 @@ export default defineComponent({
       const main = h('main', { class: 'layout-page-content' }, h('div', { class: 'page-content-container' }, slots.default?.()))
 
 
-      // 👉 Footer
-      const footer = h('footer', { class: 'layout-footer' }, [
-        h('div', { class: 'footer-content-container' }, slots.footer?.()),
-      ])
+      // 👉 Footer (solo se renderiza si hay contenido — evita una barra
+      // vacía cuando la vista consumidora no pasa nada en el slot)
+      const footer = slots.footer
+        ? h('footer', { class: 'layout-footer' }, [
+          h('div', { class: 'footer-content-container' }, slots.footer()),
+        ])
+        : null
 
 
       // 👉 Overlay
