@@ -1,0 +1,86 @@
+/*
+   |--------------------------------------------------------------------------
+   | Fonts
+   |--------------------------------------------------------------------------
+   |
+   | Import all fonts used in the template, the font configuration can be
+   | seen in "tailwind.config.js".
+   |
+   */
+@import "./fonts/_public-sans.css";
+
+/*
+   |--------------------------------------------------------------------------
+   | Components
+   |--------------------------------------------------------------------------
+   */
+@import "./components/_box.css";
+@import "./components/_global.css";
+@import "./components/_image-fit.css";
+@import "./components/_scrollbar-hidden.css";
+@import "./components/_typing-dots.css";
+@import "./components/_zoom-in.css";
+
+/*
+ |--------------------------------------------------------------------------
+ | TailwindCSS Directives
+ |--------------------------------------------------------------------------
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+|--------------------------------------------------------------------------
+| Custom CSS
+|--------------------------------------------------------------------------
+*/
+
+.zoom-img-wrap {
+  z-index: 2500 !important;
+}
+
+.custom-html ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.custom-html ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.custom-html li {
+  margin-bottom: 0.5rem !important;
+}
+
+.custom_scroll {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #6d5ae0 #ece9fb; /* Firefox: color del thumb y track */
+}
+
+.custom_scroll.dark {
+  scrollbar-width: thin;
+  scrollbar-color: #8b7ff0 #2a2b3e;
+}
+
+.custom_scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom_scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom_scroll::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.custom_scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

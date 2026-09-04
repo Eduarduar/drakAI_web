@@ -1,0 +1,46 @@
+services:
+    laravel.test:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.3'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'sail-8.3/app'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+    vite:
+        image: 'sail-8.3/app'
+        # user: sin esto el entrypoint corre como root (el script de
+        # arranque normal de la imagen, que hace el switch a sail/WWWUSER,
+        # se está saltando acá) y todo lo que Vite genera en el repo
+        # (auto-imports.d.ts, components.d.ts, .eslintrc-auto-import.json)
+        # queda root-owned e ilegible/borrable desde el host sin sudo.
+        user: '${WWWUSER}:${WWWGROUP}'
+        entrypoint: ['sh', '-c', 'cd /var/www/html && node_modules/.bin/vite --host 0.0.0.0']
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '5173:5173'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        restart: unless-stopped
+networks:
+    sail:
+        driver: bridge
